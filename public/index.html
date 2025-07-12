@@ -10,7 +10,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .keypad-btn:active { background-color: #e5e7eb; }
-        #qr-code-modal, #loading-modal, #error-modal, #coke-modal { backdrop-filter: blur(10px); }
+        #qr-code-modal, #loading-modal, #error-modal { backdrop-filter: blur(10px); }
         .loader { border-top-color: #3498db; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .view { display: none; }
@@ -85,9 +85,14 @@
                         <p id="user-email-display" class="text-sm font-medium text-gray-800">Vendedor</p>
                     </div>
                 </div>
-                 <button onclick="handleLogout()" class="text-gray-500 hover:text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3" /></svg>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="showView('settings-view')" class="text-gray-500 hover:text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </button>
+                    <button onclick="handleLogout()" class="text-gray-500 hover:text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3" /></svg>
+                    </button>
+                </div>
             </header>
 
             <div class="flex-grow flex flex-col items-center justify-center my-4">
@@ -118,6 +123,22 @@
                 <button id="generateBtn" onclick="initiatePixGeneration()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-base hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed">
                     Gerar QR Code
                 </button>
+            </div>
+        </div>
+        
+        <!-- Settings View -->
+        <div id="settings-view" class="view flex-col flex-grow">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Configurações</h2>
+            <p class="text-center text-gray-500 mt-2 mb-6">Guarde aqui a sua chave do Mercado Pago.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="mp-token" class="block text-sm font-medium text-gray-700">Access Token do Mercado Pago</label>
+                    <input type="password" id="mp-token" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm" placeholder="Cole o seu token aqui">
+                </div>
+            </div>
+            <div class="mt-8 space-y-3">
+                <button onclick="handleSaveToken()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Salvar Token</button>
+                <button onclick="showView('app-view')" class="w-full text-sm text-gray-500 hover:text-blue-600">Voltar</button>
             </div>
         </div>
 
@@ -189,6 +210,35 @@
                 showModal(errorModal);
             }
         }
+        
+        async function handleSaveToken() {
+            const token = localStorage.getItem('authToken');
+            const mercadoPagoToken = document.getElementById('mp-token').value;
+            if (!mercadoPagoToken) {
+                alert('Por favor, insira o seu token.');
+                return;
+            }
+            showModal(loadingModal);
+            try {
+                const response = await fetch('/api/save-token', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ mercadoPagoToken: mercadoPagoToken }),
+                });
+                const data = await response.json();
+                loadingModal.classList.add('hidden');
+                if (!response.ok) throw new Error(data.error || 'Erro desconhecido.');
+                alert('Token salvo com sucesso!');
+                showView('app-view');
+            } catch (error) {
+                loadingModal.classList.add('hidden');
+                document.getElementById('error-message').innerText = `Erro ao salvar token: ${error.message}`;
+                showModal(errorModal);
+            }
+        }
 
         function handleLogout() {
             localStorage.removeItem('authToken');
@@ -255,7 +305,6 @@
                     body: JSON.stringify({ amount: amount }),
                 });
                 
-                // CORREÇÃO FINAL: Usamos a variável correta `errorData`
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: `Erro do servidor: ${response.status}` }));
                     throw new Error(errorData.error || `Erro desconhecido.`);

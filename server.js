@@ -4,7 +4,7 @@ const express = require('express');
 const { MercadoPagoConfig, Payment } = require("mercadopago");
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken'); // Ferramenta para criar "crachás" de sessão
+const jwt = require('jsonwebtoken');
 
 // --- Configuração do Servidor ---
 const app = express();
@@ -19,13 +19,10 @@ const pool = new Pool({
 });
 
 // --- Chave Secreta para os Crachás de Sessão (JWT) ---
-// Guarde esta chave como uma Variável de Ambiente no Render
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-default';
 
 
 // --- Rotas da API para Utilizadores ---
-
-// Rota para registar um novo vendedor
 app.post('/api/register', async (request, response) => {
   const { email, password } = request.body;
   if (!email || !password) {
@@ -48,7 +45,6 @@ app.post('/api/register', async (request, response) => {
   }
 });
 
-// Rota para fazer o login de um vendedor
 app.post('/api/login', async (request, response) => {
     const { email, password } = request.body;
     if (!email || !password) {
@@ -64,7 +60,6 @@ app.post('/api/login', async (request, response) => {
         if (!isPasswordCorrect) {
             return response.status(401).json({ error: 'Senha incorreta.' });
         }
-        // Cria um "crachá" de sessão (JWT) para o utilizador
         const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
         response.status(200).json({ message: 'Login efetuado com sucesso!', token: token, user: { id: user.id, email: user.email } });
     } catch (error) {
@@ -76,13 +71,13 @@ app.post('/api/login', async (request, response) => {
 // --- Middleware de Autenticação (O nosso "Segurança") ---
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Formato: Bearer TOKEN
-    if (token == null) return res.sendStatus(401); // Sem crachá, sem entrada
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token == null) return res.sendStatus(401);
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403); // Crachá inválido
-        req.user = user; // Guarda as informações do utilizador no pedido
-        next(); // Deixa o pedido prosseguir
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
     });
 };
 
@@ -114,7 +109,6 @@ app.post('/api/generate-pix', authenticateToken, async (request, response) => {
   const userId = request.user.userId;
 
   try {
-    // 1. Busca o token do Mercado Pago do utilizador logado na base de dados
     const tokenResult = await pool.query("SELECT mercado_pago_token FROM users WHERE id = $1", [userId]);
     const userToken = tokenResult.rows[0]?.mercado_pago_token;
 
@@ -122,7 +116,6 @@ app.post('/api/generate-pix', authenticateToken, async (request, response) => {
         return response.status(403).json({ error: 'Nenhum Access Token do Mercado Pago configurado para este utilizador.' });
     }
 
-    // 2. Configura o cliente do Mercado Pago com o token do utilizador
     const client = new MercadoPagoConfig({ accessToken: userToken });
     const payment = new Payment(client);
 
