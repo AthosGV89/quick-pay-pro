@@ -179,9 +179,7 @@
                 loadingModal.classList.add('hidden');
                 if (!response.ok) throw new Error(data.error || 'Erro desconhecido.');
                 
-                // Guarda o "crachá" de segurança no navegador
                 localStorage.setItem('authToken', data.token);
-                
                 document.getElementById('user-email-display').innerText = data.user.email;
                 showView('app-view');
 
@@ -193,7 +191,6 @@
         }
 
         function handleLogout() {
-            // Apaga o "crachá" de segurança
             localStorage.removeItem('authToken');
             showView('welcome-view');
         }
@@ -244,7 +241,6 @@
             }
             showModal(loadingModal);
             try {
-                // Pega no "crachá" de segurança guardado
                 const token = localStorage.getItem('authToken');
                 if (!token) {
                     throw new Error('Utilizador não autenticado. Por favor, faça login novamente.');
@@ -254,14 +250,15 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        // Envia o "crachá" para o servidor
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ amount: amount }),
                 });
+                
+                // CORREÇÃO FINAL: Usamos a variável correta `errorData`
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: `Erro do servidor: ${response.status}` }));
-                    throw new Error(data.error || `Erro desconhecido.`);
+                    throw new Error(errorData.error || `Erro desconhecido.`);
                 }
                 const data = await response.json();
                 const qrCodePayload = data.qr_code;
