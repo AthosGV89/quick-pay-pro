@@ -1,0 +1,13 @@
+{
+  "name": "quick-pay-pro",
+  "version": "1.0.0",
+  "description": "Servidor para o Quick Pay",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mercadopago": "^2.0.8"
+  }
+}
