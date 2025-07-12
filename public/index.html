@@ -53,7 +53,7 @@
             </div>
         </div>
         
-        <!-- Login View (Placeholder) -->
+        <!-- Login View -->
         <div id="login-view" class="view flex-col flex-grow">
              <h2 class="text-2xl font-bold text-gray-800 text-center">Entrar na sua conta</h2>
             <p class="text-center text-gray-500 mt-2 mb-6">Bem-vindo de volta!</p>
@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div class="mt-8 space-y-3">
-                <button onclick="alert('Funcionalidade de Login a ser implementada!')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Entrar</button>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Entrar</button>
                 <button onclick="showView('welcome-view')" class="w-full text-sm text-gray-500 hover:text-blue-600">Voltar</button>
             </div>
         </div>
@@ -82,10 +82,10 @@
                         QP
                     </div>
                     <div>
-                        <p class="text-sm font-medium text-gray-800">Vendedor Teste</p>
+                        <p id="user-email-display" class="text-sm font-medium text-gray-800">Vendedor</p>
                     </div>
                 </div>
-                 <button onclick="showView('welcome-view')" class="text-gray-500 hover:text-blue-600">
+                 <button onclick="handleLogout()" class="text-gray-500 hover:text-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3" /></svg>
                 </button>
             </header>
@@ -124,7 +124,7 @@
     </div>
 
     <!-- Modals (Loading, QR Code, Error) -->
-    <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 flex-col items-center justify-center p-4 hidden"><div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div><p class="text-white text-lg font-semibold">A contactar o servidor...</p></div>
+    <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 flex-col items-center justify-center p-4 hidden"><div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div><p class="text-white text-lg font-semibold">A processar...</p></div>
     <div id="qr-code-modal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4 hidden"><div class="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full relative"><button onclick="closeModal('qr-code-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><p class="text-lg font-medium text-gray-800">QR Code Válido Gerado!</p><p id="qr-value" class="text-4xl font-bold text-blue-600 my-2"></p><img id="qr-image" src="" alt="[Imagem de QR Code PIX]" class="mx-auto my-6 w-64 h-64 rounded-lg" onerror="this.onerror=null;this.src='https://placehold.co/256x256/e2e8f0/334155?text=QR+Code';"><p class="text-sm text-gray-500">Pode escanear com a sua conta de teste.</p></div></div>
     <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4 hidden"><div class="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full relative"><button onclick="closeModal('error-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h2 class="mt-4 text-2xl font-bold text-gray-800">Ocorreu um Erro</h2><p id="error-message" class="text-gray-500 mt-2 mb-6"></p><button onclick="closeModal('error-modal')" class="w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-600 transition-colors">Entendido</button></div></div>
     
@@ -146,31 +146,53 @@
         async function handleRegister() {
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            
             showModal(loadingModal);
-
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
-
                 const data = await response.json();
                 loadingModal.classList.add('hidden');
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Erro desconhecido.');
-                }
-
+                if (!response.ok) throw new Error(data.error || 'Erro desconhecido.');
                 alert('Registo efetuado com sucesso! Agora pode entrar.');
                 showView('login-view');
-
             } catch (error) {
                 loadingModal.classList.add('hidden');
                 document.getElementById('error-message').innerText = `Erro no registo: ${error.message}`;
                 showModal(errorModal);
             }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            showModal(loadingModal);
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                const data = await response.json();
+                loadingModal.classList.add('hidden');
+                if (!response.ok) throw new Error(data.error || 'Erro desconhecido.');
+                
+                // Login com sucesso
+                document.getElementById('user-email-display').innerText = data.user.email;
+                showView('app-view');
+
+            } catch (error) {
+                loadingModal.classList.add('hidden');
+                document.getElementById('error-message').innerText = `Erro no login: ${error.message}`;
+                showModal(errorModal);
+            }
+        }
+
+        function handleLogout() {
+            // No futuro, aqui invalidaríamos o token de sessão
+            showView('welcome-view');
         }
 
         function updateDisplay() {
@@ -212,36 +234,28 @@
 
         async function initiatePixGeneration() {
             const amount = parseInt(currentValue) / 100;
-
             if (isNaN(amount) || amount <= 0) {
                 document.getElementById('error-message').innerText = 'Por favor, insira um valor válido.';
                 showModal(errorModal);
                 return;
             }
-
             showModal(loadingModal);
-
             try {
                 const response = await fetch(FUNCTION_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ amount: amount }),
                 });
-
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: `Erro do servidor: ${response.status}` }));
                     throw new Error(errorData.error || `Erro desconhecido.`);
                 }
-
                 const data = await response.json();
                 const qrCodePayload = data.qr_code;
-
                 document.getElementById('qr-value').innerText = `R$ ${amount.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrCodePayload)}`;
-                
                 loadingModal.classList.add('hidden');
                 showModal(qrCodeModal);
-
             } catch (error) {
                 console.error("Erro ao chamar a função:", error);
                 document.getElementById('error-message').innerText = `Erro: ${error.message}`;
@@ -250,7 +264,6 @@
             }
         }
         
-        updateDisplay();
     </script>
 </body>
 </html>
