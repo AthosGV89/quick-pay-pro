@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // --- Configuração do Mercado Pago ---
-// CORREÇÃO: Agora, ele lê a chave secreta do "cofre" (Environment Variables).
+// CORREÇÃO FINAL: Lê a chave secreta do "cofre" (Environment Variables) do Render.
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
@@ -30,7 +30,8 @@ app.post('/api/generate-pix', async (request, response) => {
       description: "Pagamento Quick Pay",
       payment_method_id: "pix",
       payer: {
-        email: "test_user_988599218@testuser.com",
+        // CORREÇÃO FINAL: Usamos o e-mail de pagador correto.
+        email: "comprador.teste@example.com",
       },
     };
 
