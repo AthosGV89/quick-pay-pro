@@ -179,7 +179,9 @@
                 loadingModal.classList.add('hidden');
                 if (!response.ok) throw new Error(data.error || 'Erro desconhecido.');
                 
-                // Login com sucesso
+                // Guarda o "crachá" de segurança no navegador
+                localStorage.setItem('authToken', data.token);
+                
                 document.getElementById('user-email-display').innerText = data.user.email;
                 showView('app-view');
 
@@ -191,7 +193,8 @@
         }
 
         function handleLogout() {
-            // No futuro, aqui invalidaríamos o token de sessão
+            // Apaga o "crachá" de segurança
+            localStorage.removeItem('authToken');
             showView('welcome-view');
         }
 
@@ -241,14 +244,24 @@
             }
             showModal(loadingModal);
             try {
+                // Pega no "crachá" de segurança guardado
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('Utilizador não autenticado. Por favor, faça login novamente.');
+                }
+
                 const response = await fetch(FUNCTION_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        // Envia o "crachá" para o servidor
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify({ amount: amount }),
                 });
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: `Erro do servidor: ${response.status}` }));
-                    throw new Error(errorData.error || `Erro desconhecido.`);
+                    throw new Error(data.error || `Erro desconhecido.`);
                 }
                 const data = await response.json();
                 const qrCodePayload = data.qr_code;
