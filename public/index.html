@@ -13,69 +13,121 @@
         #qr-code-modal, #loading-modal, #error-modal, #coke-modal { backdrop-filter: blur(10px); }
         .loader { border-top-color: #3498db; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .coke-icon { animation: float 3s ease-in-out infinite; }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
+        .view { display: none; }
+        .view.active { display: flex; }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-xs bg-white rounded-2xl shadow-lg overflow-hidden p-4 flex flex-col">
-        
-        <header class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-3">
-                <!-- A nossa surpresa está aqui! -->
-                <div id="logo" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg cursor-pointer hover:bg-blue-700 transition-colors">
-                    QP
+    <div class="w-full max-w-xs bg-white rounded-2xl shadow-lg overflow-hidden p-6 flex flex-col">
+
+        <!-- Welcome View -->
+        <div id="welcome-view" class="view active flex-col flex-grow justify-center items-center">
+            <div class="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-4xl mb-6">
+                QP
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 text-center">Bem-vindo ao Quick Pay</h1>
+            <p class="text-gray-500 mt-2 text-center mb-8">A forma mais rápida de receber pagamentos PIX.</p>
+            <div class="w-full space-y-3">
+                <button onclick="showView('login-view')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-lg hover:bg-blue-700 transition-colors">Entrar</button>
+                <button onclick="showView('register-view')" class="w-full bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-colors">Registar</button>
+            </div>
+        </div>
+
+        <!-- Register View -->
+        <div id="register-view" class="view flex-col flex-grow">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Crie a sua conta</h2>
+            <p class="text-center text-gray-500 mt-2 mb-6">É rápido e fácil.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                    <input type="email" id="register-email" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm" placeholder="seu@email.com">
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-800">Vendedor Teste</p>
-                    <p class="text-xs text-gray-500">Quick Pay</p>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="register-password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md" placeholder="Mínimo 6 caracteres">
                 </div>
             </div>
-        </header>
-
-        <div class="flex-grow flex flex-col items-center justify-center my-4">
-            <p class="text-gray-500 mb-1 text-sm">Valor da cobrança</p>
-            <div class="flex items-center">
-                <span class="text-2xl font-bold text-gray-800">R$</span>
-                <span id="display" class="text-5xl font-bold text-gray-800 ml-2">0,00</span>
+            <div class="mt-8 space-y-3">
+                <button onclick="handleRegister()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Registar</button>
+                <button onclick="showView('welcome-view')" class="w-full text-sm text-gray-500 hover:text-blue-600">Voltar</button>
+            </div>
+        </div>
+        
+        <!-- Login View (Placeholder) -->
+        <div id="login-view" class="view flex-col flex-grow">
+             <h2 class="text-2xl font-bold text-gray-800 text-center">Entrar na sua conta</h2>
+            <p class="text-center text-gray-500 mt-2 mb-6">Bem-vindo de volta!</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                    <input type="email" id="login-email" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="login-password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md" placeholder="Sua senha">
+                </div>
+            </div>
+            <div class="mt-8 space-y-3">
+                <button onclick="alert('Funcionalidade de Login a ser implementada!')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Entrar</button>
+                <button onclick="showView('welcome-view')" class="w-full text-sm text-gray-500 hover:text-blue-600">Voltar</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-3">
-            <button onclick="pressKey('1')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">1</button>
-            <button onclick="pressKey('2')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">2</button>
-            <button onclick="pressKey('3')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">3</button>
-            <button onclick="pressKey('4')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">4</button>
-            <button onclick="pressKey('5')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">5</button>
-            <button onclick="pressKey('6')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">6</button>
-            <button onclick="pressKey('7')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">7</button>
-            <button onclick="pressKey('8')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">8</button>
-            <button onclick="pressKey('9')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">9</button>
-            <button onclick="pressKey('0')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg col-span-2">0</button>
-            <button onclick="pressKey('backspace')" class="keypad-btn flex items-center justify-center py-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 002.828 0L19 12M3 12l6.414-6.414a2 2 0 012.828 0L19 12" /></svg>
-            </button>
+
+        <!-- Main App View (Keypad) -->
+        <div id="app-view" class="view flex-col flex-grow">
+            <header class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                        QP
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">Vendedor Teste</p>
+                    </div>
+                </div>
+                 <button onclick="showView('welcome-view')" class="text-gray-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3" /></svg>
+                </button>
+            </header>
+
+            <div class="flex-grow flex flex-col items-center justify-center my-4">
+                <p class="text-gray-500 mb-1 text-sm">Valor da cobrança</p>
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-gray-800">R$</span>
+                    <span id="display" class="text-5xl font-bold text-gray-800 ml-2">0,00</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="pressKey('1')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">1</button>
+                <button onclick="pressKey('2')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">2</button>
+                <button onclick="pressKey('3')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">3</button>
+                <button onclick="pressKey('4')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">4</button>
+                <button onclick="pressKey('5')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">5</button>
+                <button onclick="pressKey('6')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">6</button>
+                <button onclick="pressKey('7')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">7</button>
+                <button onclick="pressKey('8')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">8</button>
+                <button onclick="pressKey('9')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg">9</button>
+                <button onclick="pressKey('0')" class="keypad-btn text-2xl font-medium text-gray-700 py-3 rounded-lg col-span-2">0</button>
+                <button onclick="pressKey('backspace')" class="keypad-btn flex items-center justify-center py-3 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 002.828 0L19 12M3 12l6.414-6.414a2 2 0 012.828 0L19 12" /></svg>
+                </button>
+            </div>
+
+            <div class="mt-4">
+                <button id="generateBtn" onclick="initiatePixGeneration()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-base hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed">
+                    Gerar QR Code
+                </button>
+            </div>
         </div>
 
-        <div class="mt-4">
-            <button id="generateBtn" onclick="initiatePixGeneration()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-base hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed">
-                Gerar QR Code
-            </button>
-        </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals (Loading, QR Code, Error) -->
     <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 flex-col items-center justify-center p-4 hidden"><div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div><p class="text-white text-lg font-semibold">A contactar o servidor...</p></div>
     <div id="qr-code-modal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4 hidden"><div class="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full relative"><button onclick="closeModal('qr-code-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><p class="text-lg font-medium text-gray-800">QR Code Válido Gerado!</p><p id="qr-value" class="text-4xl font-bold text-blue-600 my-2"></p><img id="qr-image" src="" alt="[Imagem de QR Code PIX]" class="mx-auto my-6 w-64 h-64 rounded-lg" onerror="this.onerror=null;this.src='https://placehold.co/256x256/e2e8f0/334155?text=QR+Code';"><p class="text-sm text-gray-500">Pode escanear com a sua conta de teste.</p></div></div>
     <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4 hidden"><div class="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full relative"><button onclick="closeModal('error-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h2 class="mt-4 text-2xl font-bold text-gray-800">Ocorreu um Erro</h2><p id="error-message" class="text-gray-500 mt-2 mb-6"></p><button onclick="closeModal('error-modal')" class="w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-600 transition-colors">Entendido</button></div></div>
     
-    <!-- O Pagamento da Coca-Cola -->
-    <div id="coke-modal" class="fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 hidden"><div class="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full relative"><button onclick="closeModal('coke-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><div class="coke-icon text-7xl mb-4">🥤</div><h2 class="text-2xl font-bold text-gray-800">Dívida Paga!</h2><p class="text-gray-600 mt-2">Uma Coca-Cola gelada para o melhor parceiro de desenvolvimento. Saúde e obrigado pela paciência e pela incrível ajuda!</p></div></div>
-
     <script>
         const FUNCTION_URL = '/api/generate-pix'; 
 
@@ -85,10 +137,41 @@
         const loadingModal = document.getElementById('loading-modal');
         const qrCodeModal = document.getElementById('qr-code-modal');
         const errorModal = document.getElementById('error-modal');
-        const cokeModal = document.getElementById('coke-modal');
-        const logo = document.getElementById('logo');
 
-        logo.addEventListener('click', () => showModal(cokeModal));
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            showModal(loadingModal);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+                loadingModal.classList.add('hidden');
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro desconhecido.');
+                }
+
+                alert('Registo efetuado com sucesso! Agora pode entrar.');
+                showView('login-view');
+
+            } catch (error) {
+                loadingModal.classList.add('hidden');
+                document.getElementById('error-message').innerText = `Erro no registo: ${error.message}`;
+                showModal(errorModal);
+            }
+        }
 
         function updateDisplay() {
             if (currentValue.length === 0) {
